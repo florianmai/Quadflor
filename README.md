@@ -4,11 +4,11 @@ This repository contains the code for the JCDL paper [Using Deep Learning for Ti
 
 ## Installation
 
-Install Python 3.4 or higher and
+Install Python 3.7 and
 
 ```sh
 #install necessary packages
-sudo apt-get install libatlas-base-dev gfortran python3.4-dev python3.4-venv build-essential
+sudo apt-get install libatlas-base-dev gfortran build-essential
 
 #install python modules in a virtual environment with pip (this may take a while):
 python3 -m venv lucid_ml_environment
@@ -16,6 +16,14 @@ source lucid_ml_environment/bin/activate
 cd Code
 pip install -r requirements.txt
 ```
+
+The GloVE embeddings can be downloaded via the following script:
+```sh
+cd ../Resources/
+chmod +x get_glove.sh
+./get_glove.sh
+```
+ 
 
 ## Replicating the results
 
