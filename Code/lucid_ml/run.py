@@ -39,12 +39,12 @@ from bayes_opt import BayesianOptimization
 from hyperopt import fmin, rand, hp
 from sklearn.gaussian_process.kernels import Matern
 
-from classifying.br_kneighbor_classifier import BRKNeighborsClassifier
-from classifying.kneighbour_l2r_classifier import KNeighborsL2RClassifier
-from classifying.meancut_kneighbor_classifier import MeanCutKNeighborsClassifier
-from classifying.nearest_neighbor import NearestNeighbor
-from classifying.rocchioclassifier import RocchioClassifier
-from classifying.stacked_classifier import ClassifierStack
+#from classifying.br_kneighbor_classifier import BRKNeighborsClassifier
+#from classifying.kneighbour_l2r_classifier import KNeighborsL2RClassifier
+#from classifying.meancut_kneighbor_classifier import MeanCutKNeighborsClassifier
+#from classifying.nearest_neighbor import NearestNeighbor
+#from classifying.rocchioclassifier import RocchioClassifier
+#from classifying.stacked_classifier import ClassifierStack
 from classifying.tensorflow_models import MultiLabelSKFlow, mlp_base, mlp_soph, cnn, lstm
 from utils.Extractor import load_dataset
 from utils.metrics import hierarchical_f_measure, f1_per_sample
@@ -291,7 +291,7 @@ def _run_experiment(X, Y, kf, validation_set_indices, mlb, X_raw, Y_raw, tr, opt
         if VERBOSE: print("=" * 80)
         X_train, X_test, Y_train, Y_test = X[train], X[test], Y[train], Y[test]
         
-        clf = create_classifier(options, Y_train.shape[1])  # --- INTERACTIVE MODE ---
+        clf = create_classifier(options, Y_train.shape[1])
         
         # extract a validation set and inform the classifier where to find it
         if options.validation_size > 0:
@@ -568,37 +568,37 @@ def create_classifier(options, num_concepts):
         n_jobs=options.jobs)
     logregress = OneVsRestClassifier(LogisticRegression(C=64, penalty='l2', dual=False, verbose=max(0,options.verbose-2)),
         n_jobs=options.jobs)
-    l2r_classifier = KNeighborsL2RClassifier(n_neighbors=options.l2r_neighbors, max_iterations=options.max_iterations,
-                                               count_concepts=True if options.concepts else False,
-                                               number_of_concepts=num_concepts,
-                                               count_terms=True if options.terms else False,
-                                               algorithm='brute', metric='cosine',
-                                               algorithm_id = l2r_algorithm[options.l2r],
-                                               l2r_metric = options.l2r_metric + "@20",
-                                               n_jobs = options.jobs,
-                                               translation_probability = options.translation_prob)
-    mlp = MLP(verbose=options.verbose, batch_size = options.batch_size, learning_rate = options.learning_rate, epochs = options.max_iterations)
+    #l2r_classifier = KNeighborsL2RClassifier(n_neighbors=options.l2r_neighbors, max_iterations=options.max_iterations,
+    #                                           count_concepts=True if options.concepts else False,
+    #                                           number_of_concepts=num_concepts,
+    #                                           count_terms=True if options.terms else False,
+    #                                           algorithm='brute', metric='cosine',
+    #                                           algorithm_id = l2r_algorithm[options.l2r],
+    #                                           l2r_metric = options.l2r_metric + "@20",
+    #                                           n_jobs = options.jobs,
+    #                                           translation_probability = options.translation_prob)
+    #mlp = MLP(verbose=options.verbose, batch_size = options.batch_size, learning_rate = options.learning_rate, epochs = options.max_iterations)
     classifiers = {
-        "nn": NearestNeighbor(use_lsh_forest=options.lshf),
-        "brknna": BRKNeighborsClassifier(mode='a', n_neighbors=options.k, use_lsh_forest=options.lshf,
-                                         algorithm='brute', metric='cosine', auto_optimize_k=options.grid_search),
-        "brknnb": BRKNeighborsClassifier(mode='b', n_neighbors=options.k, use_lsh_forest=options.lshf,
-                                         algorithm='brute', metric='cosine', auto_optimize_k=options.grid_search),
-        "listnet": l2r_classifier,
-        "l2rdt": ClassifierStack(base_classifier=l2r_classifier, n_jobs=options.jobs, n=options.k, dependencies=options.label_dependencies),
-        "mcknn": MeanCutKNeighborsClassifier(n_neighbors=options.k, algorithm='brute', metric='cosine', soft=False),
+        #"nn": NearestNeighbor(use_lsh_forest=options.lshf),
+        #"brknna": BRKNeighborsClassifier(mode='a', n_neighbors=options.k, use_lsh_forest=options.lshf,
+        #                                 algorithm='brute', metric='cosine', auto_optimize_k=options.grid_search),
+        #"brknnb": BRKNeighborsClassifier(mode='b', n_neighbors=options.k, use_lsh_forest=options.lshf,
+        #                                 algorithm='brute', metric='cosine', auto_optimize_k=options.grid_search),
+        #"listnet": l2r_classifier,
+        #"l2rdt": ClassifierStack(base_classifier=l2r_classifier, n_jobs=options.jobs, n=options.k, dependencies=options.label_dependencies),
+        #"mcknn": MeanCutKNeighborsClassifier(n_neighbors=options.k, algorithm='brute', metric='cosine', soft=False),
         # alpha 10e-5
-        "bbayes": OneVsRestClassifier(BernoulliNB(alpha=options.alpha), n_jobs=options.jobs),
-        "mbayes": OneVsRestClassifier(MultinomialNB(alpha=options.alpha), n_jobs=options.jobs),
-        "lsvc": OneVsRestClassifier(LinearSVC(C=4, loss='squared_hinge', penalty='l2', dual=False, tol=1e-4),
-                                    n_jobs=options.jobs),
+        #"bbayes": OneVsRestClassifier(BernoulliNB(alpha=options.alpha), n_jobs=options.jobs),
+        #"mbayes": OneVsRestClassifier(MultinomialNB(alpha=options.alpha), n_jobs=options.jobs),
+        #"lsvc": OneVsRestClassifier(LinearSVC(C=4, loss='squared_hinge', penalty='l2', dual=False, tol=1e-4),
+        #                            n_jobs=options.jobs),
         "logregress": logregress,
         "sgd": sgd,
-        "rocchio": RocchioClassifier(metric = 'cosine', k = options.k),
-        "sgddt": ClassifierStack(base_classifier=sgd, n_jobs=options.jobs, n=options.k),
-        "rocchiodt": ClassifierStack(base_classifier=RocchioClassifier(metric = 'cosine'), n_jobs=options.jobs, n=options.k),
-        "logregressdt": ClassifierStack(base_classifier=logregress, n_jobs=options.jobs, n=options.k),
-        "mlp": mlp,
+        #"rocchio": RocchioClassifier(metric = 'cosine', k = options.k),
+        #"sgddt": ClassifierStack(base_classifier=sgd, n_jobs=options.jobs, n=options.k),
+        #"rocchiodt": ClassifierStack(base_classifier=RocchioClassifier(metric = 'cosine'), n_jobs=options.jobs, n=options.k),
+        #"logregressdt": ClassifierStack(base_classifier=logregress, n_jobs=options.jobs, n=options.k),
+        #"mlp": mlp,
         "mlpbase" : MultiLabelSKFlow(batch_size = options.batch_size,
                                      num_epochs=options.max_iterations,
                                      learning_rate = options.learning_rate,
@@ -678,8 +678,8 @@ def create_classifier(options, num_concepts):
                                          learning_rate = options.learning_rate, 
                                          epochs = options.max_iterations), 
                                      alpha=options.alpha, stepsize=0.01, verbose=options.verbose),
-        "mlpthr": LinRegStack(mlp, verbose=options.verbose),
-        "mlpdt" : ClassifierStack(base_classifier=mlp, n_jobs=options.jobs, n=options.k)
+        #"mlpthr": LinRegStack(mlp, verbose=options.verbose),
+        #"mlpdt" : ClassifierStack(base_classifier=mlp, n_jobs=options.jobs, n=options.k)
     }
     # Transformation: either bm25 or tfidf included in pipeline so that IDF of test data is not considered in training
     norm = "l2" if options.norm else None
